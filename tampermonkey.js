@@ -2,6 +2,7 @@
 // @name         Me Salva | c h e e t o
 // @namespace    http://tampermonkey.net/
 // @version      2024-10-12
+// @author       wwwwwwwwwww
 // @description  God is good, dinner on the table
 // @match        https://www.mesalva.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain_url=mesalva.com
