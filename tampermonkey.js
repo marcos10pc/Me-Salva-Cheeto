@@ -9,6 +9,109 @@
 // @grant        none
 // ==/UserScript==
 
+let notificationCount = 0;
+
+function createAndShowNotification(message) {
+    return new Promise((resolve) => {
+        if (document.getElementById('notification-styles') === null) {
+            const e = document.createElement("style");
+            e.id = 'notification-styles';
+            e.innerHTML = `
+                .notification {
+                    position: fixed;
+                    right: -320px;
+                    background-color: #333;
+                    color: #fff;
+                    padding: 10px;
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                    z-index: 1000;
+                    width: 320px;
+                    height: 60px;
+                    transition: right 0.5s ease;
+                }
+                .notification-content {
+                    position: relative;
+                    height: 100%;
+                }
+                .notification-content p {
+                    margin: 0;
+                    padding-top: 0;
+                }
+                .progress-bar {
+                    position: absolute;
+                    bottom: 5px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    height: 5px;
+                    background-color: #555;
+                    border-radius: 5px;
+                    width: 90%;
+                    overflow: hidden;
+                }
+                .progress-bar div {
+                    height: 100%;
+                    background-color: #bbb;
+                    width: 100%;
+                    animation: progress 5s linear forwards;
+                }
+                @keyframes progress {
+                    from {
+                        width: 100%;
+                    }
+                    to {
+                        width: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(e);
+        }
+
+        notificationCount++;
+
+        const t = document.createElement("div");
+        t.id = `notification-${notificationCount}`;
+        t.className = "notification";
+        t.style.bottom = `${20 + (notificationCount - 1) * 70}px`;
+        t.style.right = "20px";
+        t.innerHTML = `
+            <div class="notification-content">
+                <p>${message}</p>
+                <div class="progress-bar"><div></div></div>
+            </div>
+        `;
+        document.body.appendChild(t);
+
+        setTimeout(() => {
+            t.style.right = "20px";
+        }, 10);
+
+        setTimeout(() => {
+            t.style.right = "-300px";
+            setTimeout(() => {
+                t.style.display = "none";
+                notificationCount--;
+                resolve();
+            }, 500);
+        }, 5000);
+    });
+}
+
+function clickButtonById(buttonId) {
+    const buttonElement = document.querySelector(`#${buttonId} .exercise-answer__button`);
+
+    if (buttonElement) {
+        buttonElement.click();
+        createAndShowNotification("click no botão da resposta")
+    } else {
+        createAndShowNotification("bruh, nao foi possivel encontrar o botao da lição")
+    }
+}
+
+createAndShowNotification("sussy baka amongus")
+createAndShowNotification("halala marcos10pc")
+createAndShowNotification("se vc pagou por isso vc foi scammado")
+
 function abacate(originalUrl) {
     const url = new URL(originalUrl);
     const pathParts = url.pathname.split('/');
@@ -48,16 +151,8 @@ function abacate(originalUrl) {
                     const caralhos = porra_answer.pageProps.content.children[0].list;
                     const damn = caralhos.find(resposta => resposta.isCorrect === true);
                     console.log(`[DEBUG] -- ${JSON.stringify(damn)} --`)
-                    const buttons = document.querySelectorAll('.exercise-answer__button');
-
-                    buttons.forEach(button => {
-                        const letterElement = button.querySelector('.exercise-answer__letter');
-                        if (letterElement && letterElement.textContent.trim() === damn.letter) {
-                            button.click();
-                        }
-                    });
-                    const submitButton = document.querySelector('.btn.btn--primary.btn--size-md.submit-button');
-                    submitButton.click();
+                    createAndShowNotification(`RESPOSTA: ${damn.letter}`)
+                    clickButtonById(parseFloat(damn.id))
                 } catch (error) {
                     console.error('Erro no fetch:', error);
                 }
