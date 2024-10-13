@@ -9,6 +9,8 @@
 // @grant        none
 // ==/UserScript==
 
+//TODO: fazer opcao pra marcar video como concluido
+
 let notificationCount = 0;
 
 function createAndShowNotification(message) {
@@ -97,20 +99,9 @@ function createAndShowNotification(message) {
     });
 }
 
-function clickButtonById(buttonId) {
-    const buttonElement = document.querySelector(`#${buttonId} .exercise-answer__button`);
-
-    if (buttonElement) {
-        buttonElement.click();
-        createAndShowNotification("click no botão da resposta")
-    } else {
-        createAndShowNotification("bruh, nao foi possivel encontrar o botao da lição")
-    }
-}
-
-createAndShowNotification("sussy baka amongus")
-createAndShowNotification("halala marcos10pc")
-createAndShowNotification("se vc pagou por isso vc foi scammado")
+createAndShowNotification("sussy baka amongus");
+createAndShowNotification("halala marcos10pc");
+createAndShowNotification("se vc pagou por isso vc foi scammado");
 
 function abacate(originalUrl) {
     const url = new URL(originalUrl);
@@ -135,6 +126,7 @@ function abacate(originalUrl) {
             oldHref = document.location.href;
 
             if (catapimbas.test(oldHref)) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 let answer_url = abacate(oldHref);
                 console.log(`${answer_url}`);
 
@@ -145,14 +137,42 @@ function abacate(originalUrl) {
 
                     if (!pre_answer.ok) {
                         alert('uh, deu alguma porra ao tentar pegar resposta');
+                        return;
                     }
 
-                    const porra_answer = await pre_answer.json();
+                    let porra_answer = await pre_answer.json();
                     const caralhos = porra_answer.pageProps.content.children[0].list;
                     const damn = caralhos.find(resposta => resposta.isCorrect === true);
-                    console.log(`[DEBUG] -- ${JSON.stringify(damn)} --`)
-                    createAndShowNotification(`RESPOSTA: ${damn.letter}`)
-                    clickButtonById(parseFloat(damn.id))
+
+                    if (damn) {
+                        console.log(`[DEBUG] -- ${JSON.stringify(damn)} --`);
+                        createAndShowNotification(`RESPOSTA: ${damn.letter}`);
+                        const buttons = document.querySelectorAll('.exercise-answer__button');
+                        let clicked = false;
+
+                        buttons.forEach(button => {
+                            const letterElement = button.querySelector('.exercise-answer__letter');
+                            if (letterElement && letterElement.textContent.trim() === damn.letter) {
+                                button.click();
+                                clicked = true;
+                            }
+                        });
+                        if (clicked) {
+                            const submitButton = document.querySelector('.btn.btn--primary.btn--size-md.submit-button');
+                            if (submitButton) {
+                                submitButton.click();
+
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                                const nextButton = document.querySelector('.btn.btn--primary.btn--size-md');
+                                if (nextButton) {
+                                    nextButton.click();
+                                }
+                            }
+                        }
+                    } else {
+                        createAndShowNotification("Resposta não encontrada.");
+                    }
                 } catch (error) {
                     console.error('Erro no fetch:', error);
                 }
