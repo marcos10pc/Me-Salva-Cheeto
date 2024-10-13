@@ -47,6 +47,7 @@ function abacate(originalUrl) {
                     const porra_answer = await pre_answer.json();
                     const caralhos = porra_answer.pageProps.content.children[0].list;
                     const damn = caralhos.find(resposta => resposta.isCorrect === true);
+                    console.log(`[DEBUG] -- ${damn} --`)
                     const buttons = document.querySelectorAll('.exercise-answer__button');
 
                     buttons.forEach(button => {
