@@ -2,8 +2,8 @@
 // @name         Me Salva | c h e e t o
 // @namespace    http://tampermonkey.net/
 // @version      2024-10-12
-// @author       wwwwwwwwwww
 // @description  God is good, dinner on the table
+// @author       marcos10pc
 // @match        https://www.mesalva.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain_url=mesalva.com
 // @grant        none
@@ -100,6 +100,7 @@ function createAndShowNotification(message) {
 }
 
 createAndShowNotification("sussy baka amongus");
+createAndShowNotification("halala marcos10pc");
 createAndShowNotification("se vc pagou por isso vc foi scammado");
 
 function abacate(originalUrl) {
@@ -117,6 +118,7 @@ function abacate(originalUrl) {
     'use strict';
 
     let catapimbas = /^https:\/\/www\.mesalva\.com\/app\/exercicio\/[a-z0-9\-]+(\?contexto=[^&]+&lista=[^&]+&modulo=[^&]+)?$/;
+    console.log("-- sussy baka amongus marcos10pc --");
     let oldHref = document.location.href;
 
     const observer = new MutationObserver(async () => {
