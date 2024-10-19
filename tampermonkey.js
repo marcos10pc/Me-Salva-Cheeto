@@ -117,7 +117,8 @@ function abacate(originalUrl) {
 (async function() {
     'use strict';
 
-    let catapimbas = /^https:\/\/www\.mesalva\.com\/app\/exercicio\/[a-z0-9\-]+(\?contexto=[^&]+&lista=[^&]+&modulo=[^&]+)?$/;
+    // Regex atualizado para capturar URLs de exercÃ­cios com ou sem parÃ¢metros
+    let catapimbas = /^https:\/\/www\.mesalva\.com\/app\/exercicio\/[a-zA-Z0-9]+(\?contexto=[^&]+&lista=[^&]+&modulo=[^&]+)?$/;
     console.log("-- sussy baka amongus marcos10pc --");
     let oldHref = document.location.href;
 
@@ -128,7 +129,7 @@ function abacate(originalUrl) {
             if (catapimbas.test(oldHref)) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 let answer_url = abacate(oldHref);
-                console.log(`${answer_url}`);
+                console.log(`Tentando pegar respostas de: ${answer_url}`);
 
                 try {
                     let pre_answer = await fetch(answer_url, {
@@ -142,6 +143,7 @@ function abacate(originalUrl) {
 
                     let porra_answer = await pre_answer.json();
                     const caralhos = porra_answer.pageProps.content.children[0].list;
+                    console.log("ConteÃºdo recebido:", JSON.stringify(caralhos)); // Adicionando log para verificar a resposta completa
                     const damn = caralhos.find(resposta => resposta.isCorrect === true);
 
                     if (damn) {
@@ -171,10 +173,11 @@ function abacate(originalUrl) {
                             }
                         }
                     } else {
-                        createAndShowNotification("Resposta não encontrada.");
+                        createAndShowNotification("Resposta nÃ£o encontrada.");
                     }
                 } catch (error) {
                     console.error('Erro no fetch:', error);
+                    createAndShowNotification("Erro ao buscar resposta.");
                 }
             }
         }
