@@ -3,13 +3,11 @@
 // @namespace    http://tampermonkey.net/
 // @version      2024-10-12
 // @description  God is good, dinner on the table
-// @author       marcos10pc
+// @autor        marcos10pc
 // @match        https://www.mesalva.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain_url=mesalva.com
 // @grant        none
 // ==/UserScript==
-
-//TODO: fazer opcao pra marcar video como concluido
 
 let notificationCount = 0;
 
@@ -103,17 +101,6 @@ createAndShowNotification("sussy baka amongus");
 createAndShowNotification("halala marcos10pc");
 createAndShowNotification("se vc pagou por isso vc foi scammado");
 
-function abacate(originalUrl) {
-    const url = new URL(originalUrl);
-    const pathParts = url.pathname.split('/');
-    const exerciseId = pathParts[pathParts.length - 1];
-    const newPath = `/app/_next/data/eotWR84n2AGZWHLCKUcH5/exercicio/${exerciseId}.json`;
-    const params = new URLSearchParams(url.search);
-    params.append('content', 'exercicio');
-    params.append('content', exerciseId);
-    return `https://www.mesalva.com${newPath}?${params.toString()}`;
-}
-
 (async function() {
     'use strict';
 
@@ -127,21 +114,17 @@ function abacate(originalUrl) {
 
             if (catapimbas.test(oldHref)) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                let answer_url = abacate(oldHref);
-                console.log(`${answer_url}`);
 
                 try {
-                    let pre_answer = await fetch(answer_url, {
-                        method: "GET",
-                    });
-
-                    if (!pre_answer.ok) {
-                        alert('uh, deu alguma porra ao tentar pegar resposta');
+                    // OBRIGADO LOUYSATX MANDA FOTO PELADA GOSTOSA
+                    const scriptTag = document.querySelector('script#__NEXT_DATA__');
+                    if (!scriptTag) {
+                        alert("Uh, deu alguma porra tentando pegar a resposta")
                         return;
                     }
 
-                    let porra_answer = await pre_answer.json();
-                    const caralhos = porra_answer.pageProps.content.children[0].list;
+                    const porra_answer = JSON.parse(scriptTag.textContent);
+                    const caralhos = porra_answer.props.pageProps.content.children[0].list;
                     const damn = caralhos.find(resposta => resposta.isCorrect === true);
 
                     if (damn) {
@@ -174,7 +157,7 @@ function abacate(originalUrl) {
                         createAndShowNotification("Resposta não encontrada.");
                     }
                 } catch (error) {
-                    console.error('Erro no fetch:', error);
+                    console.error('Erro ao processar __NEXT_DATA__:', error);
                 }
             }
         }
