@@ -13,7 +13,7 @@ let notificationCount = 0;
 
 function createAndShowNotification(message) {
     return new Promise((resolve) => {
-        if (document.getElementById('notification-styles') === null) {
+        if (!document.getElementById('notification-styles')) {
             const e = document.createElement("style");
             e.id = 'notification-styles';
             e.innerHTML = `
@@ -68,12 +68,10 @@ function createAndShowNotification(message) {
         }
 
         notificationCount++;
-
         const t = document.createElement("div");
         t.id = `notification-${notificationCount}`;
         t.className = "notification";
         t.style.bottom = `${20 + (notificationCount - 1) * 70}px`;
-        t.style.right = "20px";
         t.innerHTML = `
             <div class="notification-content">
                 <p>${message}</p>
@@ -97,69 +95,67 @@ function createAndShowNotification(message) {
     });
 }
 
-createAndShowNotification("sussy baka amongus");
-createAndShowNotification("halala marcos10pc");
-createAndShowNotification("se vc pagou por isso vc foi scammado");
+async function getCorrectAnswer() {
+    try {
+        const response = await fetch(window.location.href);
+        const data = await response.text();
+        const scriptRegex = /<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s;
+        const match = data.match(scriptRegex);
+
+        if (match) {
+            const jsonData = JSON.parse(match[1]);
+            const answer = jsonData.props.pageProps.content.children[0].list.find(resposta => resposta.isCorrect === true);
+            return answer ? answer.letter : null;
+        } else {
+            createAndShowNotification("Não foi possível obter a resposta.");
+        }
+    } catch (error) {
+        console.error('Erro ao buscar a resposta:', error);
+        createAndShowNotification('Erro ao buscar a resposta.');
+    }
+}
+
+async function processExercise() {
+    const correctAnswer = await getCorrectAnswer();
+
+    if (correctAnswer) {
+        createAndShowNotification(`RESPOSTA: ${correctAnswer}`);
+        const buttons = document.querySelectorAll('.exercise-answer__button');
+        let clicked = false;
+
+        buttons.forEach(button => {
+            const letterElement = button.querySelector('.exercise-answer__letter');
+            if (letterElement && letterElement.textContent.trim() === correctAnswer) {
+                button.click();
+                clicked = true;
+            }
+        });
+
+        if (clicked) {
+            const submitButton = document.querySelector('.btn.btn--primary.btn--size-md.submit-button');
+            if (submitButton) {
+                submitButton.click();
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const nextButton = document.querySelector('.btn.btn--primary.btn--size-md');
+                if (nextButton) {
+                    nextButton.click();
+                }
+            }
+        }
+    } else {
+        createAndShowNotification("Resposta não encontrada.");
+    }
+}
 
 (async function() {
     'use strict';
 
-    let catapimbas = /^https:\/\/www\.mesalva\.com\/app\/exercicio\/[a-z0-9\-]+(\?contexto=[^&]+&lista=[^&]+&modulo=[^&]+)?$/;
-    console.log("-- sussy baka amongus marcos10pc --");
     let oldHref = document.location.href;
-
     const observer = new MutationObserver(async () => {
         if (oldHref !== document.location.href) {
             oldHref = document.location.href;
-
-            if (catapimbas.test(oldHref)) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                try {
-                    // OBRIGADO LOUYSATX MANDA FOTO PELADA GOSTOSA
-                    const scriptTag = document.querySelector('script#__NEXT_DATA__');
-                    if (!scriptTag) {
-                        alert("Uh, deu alguma porra tentando pegar a resposta")
-                        return;
-                    }
-
-                    const porra_answer = JSON.parse(scriptTag.textContent);
-                    const caralhos = porra_answer.props.pageProps.content.children[0].list;
-                    const damn = caralhos.find(resposta => resposta.isCorrect === true);
-
-                    if (damn) {
-                        console.log(`[DEBUG] -- ${JSON.stringify(damn)} --`);
-                        createAndShowNotification(`RESPOSTA: ${damn.letter}`);
-                        const buttons = document.querySelectorAll('.exercise-answer__button');
-                        let clicked = false;
-
-                        buttons.forEach(button => {
-                            const letterElement = button.querySelector('.exercise-answer__letter');
-                            if (letterElement && letterElement.textContent.trim() === damn.letter) {
-                                button.click();
-                                clicked = true;
-                            }
-                        });
-                        if (clicked) {
-                            const submitButton = document.querySelector('.btn.btn--primary.btn--size-md.submit-button');
-                            if (submitButton) {
-                                submitButton.click();
-
-                                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                                const nextButton = document.querySelector('.btn.btn--primary.btn--size-md');
-                                if (nextButton) {
-                                    nextButton.click();
-                                }
-                            }
-                        }
-                    } else {
-                        createAndShowNotification("Resposta não encontrada.");
-                    }
-                } catch (error) {
-                    console.error('Erro ao processar __NEXT_DATA__:', error);
-                }
-            }
+            await processExercise();
         }
     });
 
@@ -167,4 +163,5 @@ createAndShowNotification("se vc pagou por isso vc foi scammado");
         childList: true,
         subtree: true
     });
+    await processExercise();
 })();
