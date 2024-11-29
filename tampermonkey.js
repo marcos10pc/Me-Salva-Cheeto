@@ -3,17 +3,19 @@
 // @namespace    http://tampermonkey.net/
 // @version      2024-10-12
 // @description  God is good, dinner on the table
-// @autor        marcos10pc
+// @author       marcos10pc
 // @match        https://www.mesalva.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain_url=mesalva.com
 // @grant        none
 // ==/UserScript==
 
+//TODO: fazer opcao pra marcar video como concluido
+
 let notificationCount = 0;
 
 function createAndShowNotification(message) {
     return new Promise((resolve) => {
-        if (!document.getElementById('notification-styles')) {
+        if (document.getElementById('notification-styles') === null) {
             const e = document.createElement("style");
             e.id = 'notification-styles';
             e.innerHTML = `
@@ -68,10 +70,12 @@ function createAndShowNotification(message) {
         }
 
         notificationCount++;
+
         const t = document.createElement("div");
         t.id = `notification-${notificationCount}`;
         t.className = "notification";
         t.style.bottom = `${20 + (notificationCount - 1) * 70}px`;
+        t.style.right = "20px";
         t.innerHTML = `
             <div class="notification-content">
                 <p>${message}</p>
@@ -95,67 +99,84 @@ function createAndShowNotification(message) {
     });
 }
 
-async function getCorrectAnswer() {
-    try {
-        const response = await fetch(window.location.href);
-        const data = await response.text();
-        const scriptRegex = /<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s;
-        const match = data.match(scriptRegex);
+createAndShowNotification("sussy baka amongus");
+createAndShowNotification("halala marcos10pc");
+createAndShowNotification("se vc pagou por isso vc foi scammado");
 
-        if (match) {
-            const jsonData = JSON.parse(match[1]);
-            const answer = jsonData.props.pageProps.content.children[0].list.find(resposta => resposta.isCorrect === true);
-            return answer ? answer.letter : null;
-        } else {
-            createAndShowNotification("Não foi possível obter a resposta.");
-        }
-    } catch (error) {
-        console.error('Erro ao buscar a resposta:', error);
-        createAndShowNotification('Erro ao buscar a resposta.');
-    }
-}
-
-async function processExercise() {
-    const correctAnswer = await getCorrectAnswer();
-
-    if (correctAnswer) {
-        createAndShowNotification(`RESPOSTA: ${correctAnswer}`);
-        const buttons = document.querySelectorAll('.exercise-answer__button');
-        let clicked = false;
-
-        buttons.forEach(button => {
-            const letterElement = button.querySelector('.exercise-answer__letter');
-            if (letterElement && letterElement.textContent.trim() === correctAnswer) {
-                button.click();
-                clicked = true;
-            }
-        });
-
-        if (clicked) {
-            const submitButton = document.querySelector('.btn.btn--primary.btn--size-md.submit-button');
-            if (submitButton) {
-                submitButton.click();
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                const nextButton = document.querySelector('.btn.btn--primary.btn--size-md');
-                if (nextButton) {
-                    nextButton.click();
-                }
-            }
-        }
-    } else {
-        createAndShowNotification("Resposta não encontrada.");
-    }
+function abacate(originalUrl) {
+    const url = new URL(originalUrl);
+    const pathParts = url.pathname.split('/');
+    const exerciseId = pathParts[pathParts.length - 1];
+    const newPath = `/app/_next/data/bm2l3_QV91OobhF5hOUQF/exercicio/${exerciseId}.json`;
+    const params = new URLSearchParams(url.search);
+    params.append('content', 'exercicio');
+    params.append('content', exerciseId);
+    return `https://www.mesalva.com${newPath}?${params.toString()}`;
 }
 
 (async function() {
     'use strict';
 
+    let catapimbas = /^https:\/\/www\.mesalva\.com\/app\/exercicio\/[a-z0-9\-]+(\?contexto=[^&]+&lista=[^&]+&modulo=[^&]+)?$/;
+    console.log("-- sussy baka amongus marcos10pc --");
     let oldHref = document.location.href;
+
     const observer = new MutationObserver(async () => {
         if (oldHref !== document.location.href) {
             oldHref = document.location.href;
-            await processExercise();
+
+            if (catapimbas.test(oldHref)) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                let answer_url = abacate(oldHref);
+                console.log(`${answer_url}`);
+
+                try {
+                    let pre_answer = await fetch(answer_url, {
+                        method: "GET",
+                    });
+
+                    if (!pre_answer.ok) {
+                        alert('uh, deu alguma porra ao tentar pegar resposta');
+                        return;
+                    }
+
+                    let porra_answer = await pre_answer.json();
+                    const caralhos = porra_answer.pageProps.content.children[0].list;
+                    const damn = caralhos.find(resposta => resposta.isCorrect === true);
+
+                    if (damn) {
+                        console.log(`[DEBUG] -- ${JSON.stringify(damn)} --`);
+                        createAndShowNotification(`RESPOSTA: ${damn.letter}`);
+                        const buttons = document.querySelectorAll('.exercise-answer__button');
+                        let clicked = false;
+
+                        buttons.forEach(button => {
+                            const letterElement = button.querySelector('.exercise-answer__letter');
+                            if (letterElement && letterElement.textContent.trim() === damn.letter) {
+                                button.click();
+                                clicked = true;
+                            }
+                        });
+                        if (clicked) {
+                            const submitButton = document.querySelector('.btn.btn--primary.btn--size-md.submit-button');
+                            if (submitButton) {
+                                submitButton.click();
+
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                                const nextButton = document.querySelector('.btn.btn--primary.btn--size-md');
+                                if (nextButton) {
+                                    nextButton.click();
+                                }
+                            }
+                        }
+                    } else {
+                        createAndShowNotification("Resposta não encontrada.");
+                    }
+                } catch (error) {
+                    console.error('Erro no fetch:', error);
+                }
+            }
         }
     });
 
@@ -163,5 +184,4 @@ async function processExercise() {
         childList: true,
         subtree: true
     });
-    await processExercise();
 })();
